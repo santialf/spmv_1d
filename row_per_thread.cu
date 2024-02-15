@@ -9,6 +9,10 @@
 #include "mmio.c"
 #include "smsh.c"
 
+#include <string>
+#include <iostream>
+#include <fstream>
+
 #define THREADS_PER_BLK 256
 
 float* createRandomArray(int n)
@@ -53,7 +57,6 @@ void spmv_1D(int* rowPtr, int* colPtr, float* valPtr,
     float* dense_vec, float* results, int n_rows) {
 
     int id = blockIdx.x * blockDim.x + threadIdx.x; 
-    int N = rowPtr[id + 1] - rowPtr[id];
 
     float sum = 0.0f;
 
@@ -254,9 +257,7 @@ int main(int argc, char *argv[]) {
 
 	clock_gettime(CLOCK_MONOTONIC, &t_end);
 	double timing_duration = ((t_end.tv_sec + ((double) t_end.tv_nsec / 1000000000)) - (t_start.tv_sec + ((double) t_start.tv_nsec / 1000000000)));
-	printf("%s (seconds):\t%0.6lf %f\n",argv[1], timing_duration, elapsedTime);
-
-    //CHECK_CUDA( cudaMemcpy(hY, dY, A_num_rows * sizeof(float), cudaMemcpyDeviceToHost) )
+	printf("%s (seconds):\t%0.6lf\n",argv[1], timing_duration);
 
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
