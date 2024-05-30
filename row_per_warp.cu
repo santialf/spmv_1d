@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
         values[i] = V_complete[i];
         rowPtr[I_complete[i] + 1]++;
     }
-    for (i = 0; i < A_num_rows + 1; i++) {
+    for (i = 0; i < A_num_rows; i++) {
         rowPtr[i + 1] += rowPtr[i];
     }
     A_nnz = nz;

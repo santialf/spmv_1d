@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
         values[i] = V_complete[i];
         rowPtr[I_complete[i] + 1]++;
     }
-    for (i = 0; i < A_num_rows + 1; i++) {
+    for (i = 0; i < A_num_rows; i++) {
         rowPtr[i + 1] += rowPtr[i];
     }
     A_nnz = nz;
@@ -208,12 +208,6 @@ int main(int argc, char *argv[]) {
 
     /* Allocate memory for the vector of the results */
     hY = (float*)malloc(A_num_cols * sizeof(float));
-
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-
-
 
     //--------------------------------------------------------------------------
     // Device memory management
@@ -251,27 +245,16 @@ int main(int argc, char *argv[]) {
 
     struct timespec t_start, t_end;
     clock_gettime(CLOCK_MONOTONIC, &t_start);
-    cudaEventRecord(start, 0);
 
     for(int i=0; i < 1000; i++) {
-    	
         spmv_1D<<<numBlocks,threadsPerBlock>>>(dA_csrOffsets, dA_columns, dA_values, dX, dY, A_num_rows, rows_per_thread);
 	    cudaDeviceSynchronize();
     }
-	
     cudaDeviceSynchronize();
-
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    float elapsedTime = 0;
-    cudaEventElapsedTime(&elapsedTime, start, stop);
 
 	clock_gettime(CLOCK_MONOTONIC, &t_end);
 	double timing_duration = ((t_end.tv_sec + ((double) t_end.tv_nsec / 1000000000)) - (t_start.tv_sec + ((double) t_start.tv_nsec / 1000000000)));
-	printf("%s (seconds):\t%0.6lf %f\n",argv[1], timing_duration, elapsedTime);
-
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+	printf("%s (seconds):\t%0.6lf\n",argv[1], timing_duration);
 
     // device memory deallocation
     CHECK_CUDA( cudaFree(dA_csrOffsets) )
